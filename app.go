@@ -42,6 +42,10 @@ func validateUserBalance(userID int64, amount float64) error {
 		err = fmt.Errorf("Balance is empty, please top up")
 	}
 
+	if BalanceData[userID].Balance < amount {
+		err = fmt.Errorf("Does not have enough balance")
+	}
+
 	return err
 }
 
@@ -49,10 +53,6 @@ func validateUserBalance(userID int64, amount float64) error {
 func updateDatabase(userID int64, amount float64) error {
 	// Simulate database update
 	// Here you would have actual code to update your database
-	if BalanceData[userID].Balance < amount {
-		return fmt.Errorf("SALDO GACUKUP")
-	}
-
 	userBalance := BalanceData[userID]
 	userBalance.Balance = userBalance.Balance - amount
 	BalanceData[userID] = userBalance
