@@ -39,12 +39,12 @@ func validateUserBalance(userID int64, amount float64) (err error) {
 	}
 
 	if BalanceData[userID].Balance == 0 {
-		err = fmt.Errorf("Balance is empty, please top up")
+		err = fmt.Errorf("balance is empty, please top up")
 		return
 	}
 
 	if BalanceData[userID].Balance < amount {
-		err = fmt.Errorf("Does not have enough balance")
+		err = fmt.Errorf("does not have enough balance")
 		return
 	}
 
