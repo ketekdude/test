@@ -68,6 +68,21 @@ func DisburseBalance(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println("latest balance: ", BalanceData[req.UserID])
 	//user validation
+	if BalanceData[req.UserID].UserID == 0 {
+		//user does not exist
+		resp.Message = "Could not acquire lock"
+		resp.Balance = BalanceData[req.UserID].Balance
+		// Encode the error response as JSON
+		errJSON, err := json.Marshal(resp)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusTooManyRequests)
+			return
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(errJSON)
+		return
+	}
 	lockKey := fmt.Sprintf("db:update:lock:%d", req.UserID)
 	lockValue := strconv.FormatInt(time.Now().UnixNano(), 10)
 
@@ -98,7 +113,7 @@ func DisburseBalance(w http.ResponseWriter, r *http.Request) {
 	defer redisClient.Del(ctx, lockKey) // Release lock after operation
 	//time.sleep was used to check if the NX lock is working
 	//you can dismiss it later.
-	time.Sleep(5 * time.Second)
+	// time.Sleep(5 * time.Second)
 	// Perform atomic decrement operation
 
 	// Update the database
