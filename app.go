@@ -74,17 +74,31 @@ func DisburseBalance(w http.ResponseWriter, r *http.Request) {
 	// Acquire lock
 	//when use setNX we will prevent all update on this balance
 	//so we will prevent an update with a not latest data.
-	locked, err := redisClient.SetNX(ctx, lockKey, lockValue, 10*time.Second).Result()
+	locked, err := redisClient.SetNX(ctx, lockKey, lockValue, 100*time.Second).Result()
 	if err != nil {
 		http.Error(w, "Failed to acquire lock", http.StatusInternalServerError)
 		return
 	}
 	if !locked {
-		http.Error(w, "Could not acquire lock", http.StatusTooManyRequests)
+		resp.Message = "Could not acquire lock"
+		resp.Balance = BalanceData[req.UserID].Balance
+		// Encode the error response as JSON
+		errJSON, err := json.Marshal(resp)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusTooManyRequests)
+			return
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(errJSON)
 		return
+		// http.Error(w, "Could not acquire lock", http.StatusTooManyRequests)
+		// return
 	}
 	defer redisClient.Del(ctx, lockKey) // Release lock after operation
-
+	//time.sleep was used to check if the NX lock is working
+	//you can dismiss it later.
+	time.Sleep(5 * time.Second)
 	// Perform atomic decrement operation
 
 	// Update the database
