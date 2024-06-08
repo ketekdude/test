@@ -68,7 +68,7 @@ func DisburseBalance(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println("latest balance: ", BalanceData[req.UserID])
 	//user validation
-	lockKey := "db:update:lock"
+	lockKey := fmt.Sprintf("db:update:lock:%d", req.UserID)
 	lockValue := strconv.FormatInt(time.Now().UnixNano(), 10)
 
 	// Acquire lock
