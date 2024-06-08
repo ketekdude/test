@@ -31,6 +31,20 @@ type Response struct {
 // balance := make(map[int64]UserBalance{})
 var BalanceData = make(map[int64]UserBalance)
 
+func validateUserBalance(userID int64, amount float64) error {
+	var err error
+	if BalanceData[userID].UserID == 0 {
+		//user does not exist
+		err = fmt.Errorf("UserID does not exist")
+	}
+
+	if BalanceData[userID].Balance == 0 {
+		err = fmt.Errorf("Balance is empty, please top up")
+	}
+
+	return err
+}
+
 // Mock function to update the database
 func updateDatabase(userID int64, amount float64) error {
 	// Simulate database update
@@ -68,40 +82,24 @@ func DisburseBalance(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println("latest balance: ", BalanceData[req.UserID])
 	//user validation
-	if BalanceData[req.UserID].UserID == 0 {
-		//user does not exist
-		resp.Message = "UserID does not exist"
-		resp.Balance = BalanceData[req.UserID].Balance
-		// Encode the error response as JSON
-		errJSON, err := json.Marshal(resp)
-		if err != nil {
-			http.Error(w, "Internal Server Error", http.StatusTooManyRequests)
-			return
-		}
-
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write(errJSON)
-		return
-	}
-
-	if BalanceData[req.UserID].Balance == 0 {
-		//if the balance already 0, no need to process the request even further.
-		resp.Message = "Balance is empty, please do a top up"
-		resp.Balance = BalanceData[req.UserID].Balance
-		// Encode the error response as JSON
-		errJSON, err := json.Marshal(resp)
-		if err != nil {
-			http.Error(w, "Internal Server Error", http.StatusTooManyRequests)
-			return
-		}
-
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write(errJSON)
-		return
-	}
 	lockKey := fmt.Sprintf("db:update:lock:%d", req.UserID)
 	lockValue := strconv.FormatInt(time.Now().UnixNano(), 10)
+	errVal := validateUserBalance(req.UserID, req.Amount)
+	if errVal != nil {
+		// if the balance already 0, no need to process the request even further.
+		resp.Message = errVal.Error()
+		resp.Balance = BalanceData[req.UserID].Balance
+		// Encode the error response as JSON
+		errJSON, err := json.Marshal(resp)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusTooManyRequests)
+			return
+		}
 
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(errJSON)
+		return
+	}
 	// Acquire lock
 	//when use setNX we will prevent all update on this balance
 	//so we will prevent an update with a not latest data.
