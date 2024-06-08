@@ -83,6 +83,22 @@ func DisburseBalance(w http.ResponseWriter, r *http.Request) {
 		w.Write(errJSON)
 		return
 	}
+
+	if BalanceData[req.UserID].Balance == 0 {
+		//if the balance already 0, no need to process the request even further.
+		resp.Message = "Balance is empty, please do a top up"
+		resp.Balance = BalanceData[req.UserID].Balance
+		// Encode the error response as JSON
+		errJSON, err := json.Marshal(resp)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusTooManyRequests)
+			return
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(errJSON)
+		return
+	}
 	lockKey := fmt.Sprintf("db:update:lock:%d", req.UserID)
 	lockValue := strconv.FormatInt(time.Now().UnixNano(), 10)
 
