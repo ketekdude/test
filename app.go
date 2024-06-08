@@ -31,22 +31,24 @@ type Response struct {
 // balance := make(map[int64]UserBalance{})
 var BalanceData = make(map[int64]UserBalance)
 
-func validateUserBalance(userID int64, amount float64) error {
-	var err error
+func validateUserBalance(userID int64, amount float64) (err error) {
 	if BalanceData[userID].UserID == 0 {
 		//user does not exist
 		err = fmt.Errorf("UserID does not exist")
+		return
 	}
 
 	if BalanceData[userID].Balance == 0 {
 		err = fmt.Errorf("Balance is empty, please top up")
+		return
 	}
 
 	if BalanceData[userID].Balance < amount {
 		err = fmt.Errorf("Does not have enough balance")
+		return
 	}
 
-	return err
+	return
 }
 
 // Mock function to update the database
