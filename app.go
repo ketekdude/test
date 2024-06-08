@@ -104,10 +104,6 @@ func DisburseBalance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// response := map[string]interface{}{
-	// 	"message": "Disbursement successful",
-	// 	"balance": result,
-	// }
 	resp.Message = "Disbursement successful"
 	resp.Balance = BalanceData[req.UserID].Balance
 
