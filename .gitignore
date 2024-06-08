@@ -17,7 +17,8 @@
 # Dependency directories (remove the comment below to include it)
 vendor/
 
-*.exe
+test
+!test/
 
 # Go workspace file
 go.work
