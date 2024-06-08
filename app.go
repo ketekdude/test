@@ -70,7 +70,7 @@ func DisburseBalance(w http.ResponseWriter, r *http.Request) {
 	//user validation
 	if BalanceData[req.UserID].UserID == 0 {
 		//user does not exist
-		resp.Message = "Could not acquire lock"
+		resp.Message = "UserID does not exist"
 		resp.Balance = BalanceData[req.UserID].Balance
 		// Encode the error response as JSON
 		errJSON, err := json.Marshal(resp)
