@@ -85,23 +85,22 @@ func DisburseBalance(w http.ResponseWriter, r *http.Request) {
 	}
 	defer redisClient.Del(ctx, lockKey) // Release lock after operation
 
-	balanceKey := fmt.Sprintf("user:%d:balance", req.UserID)
-
 	// Perform atomic decrement operation
 
 	// Update the database
 	if err := updateDatabase(req.UserID, req.Amount); err != nil {
 		// Revert the decrement in case of database update failure
-		redisClient.IncrByFloat(ctx, balanceKey, req.Amount)
-		// http.Error(w, err.Error(), http.StatusInternalServerError)
-		// response := map[string]interface{}{
-		// 	"message": "Disbursement fail,",
-		// 	"balance": result,
-		// }
 		resp.Message = err.Error()
 		resp.Balance = BalanceData[req.UserID].Balance
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		// Encode the error response as JSON
+		errJSON, err := json.Marshal(resp)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(errJSON)
 		return
 	}
 
