@@ -1,0 +1,45 @@
+syntax = "proto3";
+option go_package = "";
+import "google/protobuf/empty.proto";
+package uploader;
+
+service Uploader {
+  rpc Upload(FileTransferRequest) returns (google.protobuf.Empty) {}
+  rpc UploadStream(stream FileStreamRequest) returns (google.protobuf.Empty) {}
+  rpc DownloadStream(FileRequest) returns (stream FileChunk) {}
+  rpc Download(FileRequest) returns (FileData) {}
+}
+
+message FileTransferRequest {
+  FileHeader header = 1;
+  bytes data = 2;
+}
+
+message FileStreamRequest {
+  oneof contents {
+    FileHeader header = 1;
+    bytes chunk = 2;
+  }
+}
+
+message FileHeader {
+  string name = 1;
+  oneof optional_file_size {
+        int64 file_size = 2;
+    }
+}
+
+message FileRequest {
+  string file_url = 1;  // URL to the file
+}
+
+message FileChunk {
+  bytes chunk_data = 1;
+  int32 chunk_number = 2;
+}
+
+
+message FileData {
+  bytes chunk_data = 1;
+  int32 chunk_number = 2;
+}
