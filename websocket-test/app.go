@@ -42,7 +42,7 @@ func main() {
 	// WebSocket route
 	r := mux.NewRouter()
 	// Define routes with specific methods
-	r.HandleFunc("/disburse", handleWebSocket).Methods(http.MethodGet)
+	r.HandleFunc("/chat", handleWebSocket).Methods(http.MethodGet)
 
 	// Start listening for messages from Redis Pub/Sub
 	go listenToRedisChannel()
