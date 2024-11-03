@@ -33,6 +33,11 @@ type Notification struct {
 	Message string `json:"message"`
 }
 
+type Response struct {
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
+}
+
 func main() {
 	// Initialize Redis client
 	redisClient = redis.NewClient(&redis.Options{
@@ -43,6 +48,7 @@ func main() {
 	r := mux.NewRouter()
 	// Define routes with specific methods
 	r.HandleFunc("/chat", handleWebSocket).Methods(http.MethodGet)
+	r.HandleFunc("/online_list", handleOnlineList).Methods(http.MethodGet)
 
 	// Start listening for messages from Redis Pub/Sub
 	go listenToRedisChannel()

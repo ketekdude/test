@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 
@@ -65,4 +66,18 @@ func deliverQueuedMessages(userID string, conn *websocket.Conn) {
 			return
 		}
 	}
+}
+
+// to add counter online
+func onlineListCounterIncr() {
+	redisClient.Incr(context.Background(), "total_online")
+}
+
+func onlineListCounterDecr() {
+	redisClient.Decr(context.Background(), "total_online")
+}
+
+func getOnlineList() int {
+	total, _ := redisClient.Get(context.Background(), "total_online").Int()
+	return total
 }

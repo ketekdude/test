@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 )
@@ -26,4 +27,21 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	log.Printf("User %s connected\n", userID)
 
 	messagingConnector(userID, conn)
+}
+
+func handleOnlineList(w http.ResponseWriter, r *http.Request) {
+	var resp Response
+
+	resp.Message = "success"
+	data := struct {
+		OnlineList  interface{}
+		TotalOnline int
+	}{
+		OnlineList:  websocketConns,
+		TotalOnline: getOnlineList(),
+	}
+	resp.Data = data
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resp)
 }

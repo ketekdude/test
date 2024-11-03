@@ -12,6 +12,9 @@ import (
 func messagingConnector(userID string, conn *websocket.Conn) {
 	// Check for any queued messages for the user in Redis
 	deliverQueuedMessages(userID, conn)
+	onlineListCounterIncr()
+
+	defer onlineListCounterDecr()
 	// Listen for messages from the WebSocket connection
 	for {
 		_, msg, err := conn.ReadMessage()
