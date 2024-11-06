@@ -7,6 +7,7 @@ toolchain go1.22.8
 require (
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang/protobuf v1.5.4
+	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
 	github.com/gorilla/websocket v1.5.3
 	google.golang.org/grpc v1.67.1
