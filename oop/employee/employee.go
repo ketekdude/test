@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// Encapsulate the func to this struct on OOP practice
+// Inherit company func in this package
 type Employee struct {
 	Id      string
 	Name    string
