@@ -2,13 +2,9 @@ package main
 
 import (
 	"fmt"
-	"test/oop/company"
+	company "test/oop/companyadapter"
 	"test/oop/employee"
 )
-
-type companyInterface interface {
-	GetCompanyName() string
-}
 
 func main() {
 	c, err := company.NewCompany("tokopedia", "indonesia")
@@ -17,20 +13,20 @@ func main() {
 		return
 	}
 	c.ChangeRegion("asia tenggara")
-	fmt.Println(c.GetCompanyName(), c.GetCompanyCountry(), c.GetRegion())
+	fmt.Println(c.GetCompanyName(), c.GetCompanyCountry())
 
 	e, err := employee.NewEmployee("rickigozal", "indonesia", c)
 	if err != nil {
 		fmt.Println("ERROR WOI", err)
 		return
 	}
-
-	fmt.Println(e.GetEmployeeName(), e.Company.GetCompanyName(), e.Company.GetRegion())
-
+	e.Company.ChangeRegion("asia timur")
+	fmt.Println(e.GetEmployeeName())
+	fmt.Println(c.GetRegion())
 	fmt.Println(checkInterfaceName(c))
 }
 
 // abstraction func
-func checkInterfaceName(c companyInterface) string {
-	return c.GetCompanyName()
+func checkInterfaceName(c company.CompanyInterface) string {
+	return c.GetRegion()
 }

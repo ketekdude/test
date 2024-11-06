@@ -14,18 +14,27 @@ type Company struct {
 	name    string
 	country string
 	region  string
+	ICompany
 }
 
-func NewCompany(name string, country string) (*Company, error) {
+type ICompany interface {
+	GetCompanyName() string
+	GetCompanyCountry() string
+	GetRegion() string
+	ChangeRegion(region string) string
+}
+
+func NewCompany(name string, country string) (ICompany, error) {
 	if name == "" || country == "" {
 		return nil, fmt.Errorf("name empty")
 	}
 
 	return &Company{
-		Id:      uuid.New().String(),
-		name:    name,
-		country: country,
-		region:  "asia",
+		Id:       uuid.New().String(),
+		name:     name,
+		country:  country,
+		region:   "asia",
+		ICompany: &Company{},
 	}, nil
 }
 

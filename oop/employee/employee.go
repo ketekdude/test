@@ -2,7 +2,6 @@ package employee
 
 import (
 	"fmt"
-	"test/oop/company"
 
 	"github.com/google/uuid"
 )
@@ -11,14 +10,21 @@ import (
 type Employee struct {
 	Id      string
 	Name    string
-	Company *company.Company
+	Company companyInterface
 }
 
-func NewEmployee(name string, country string, company *company.Company) (*Employee, error) {
+type companyInterface interface {
+	ChangeRegion(string) string
+}
+
+func NewEmployee(name string, country string, company companyInterface) (*Employee, error) {
 	if name == "" || country == "" {
 		return nil, fmt.Errorf("name empty")
 	}
 
+	if company == nil {
+		return nil, fmt.Errorf("ERROR BANGKE")
+	}
 	return &Employee{
 		Id:      uuid.New().String(),
 		Name:    name,
