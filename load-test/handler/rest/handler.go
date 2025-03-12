@@ -12,7 +12,6 @@ import (
 )
 
 func RunK6Test(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Handler")
 	cmd := exec.Command("k6", "run", "script.js")
 	output, err := cmd.CombinedOutput()
 	// resp := response.StandardResponse{}
