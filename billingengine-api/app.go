@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/rs/cors"
+
 	"github.com/go-redis/redis/v8"
 	"github.com/gorilla/mux"
 )
@@ -150,6 +152,18 @@ func GetLoanBilling(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resp)
 }
 
+func TestPrint(w http.ResponseWriter, r *http.Request) {
+	var resp Response
+	var input map[string]interface{}
+	_ = json.NewDecoder(r.Body).Decode(&input)
+
+	resp.Message = "Success"
+	resp.Data = input
+	fmt.Println(input)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resp)
+}
+
 // Mock function to update the database
 
 func GeneratePaymentRequest(loanID int64) error {
@@ -264,16 +278,46 @@ func main() {
 	// http.HandleFunc("/payment", DisburseBalance)
 	r := mux.NewRouter()
 
+	// r.Use(corsMiddleware)
+
 	// Define routes with specific methods
 	// r.HandleFunc("/disburse", DisburseBalance).Methods(http.MethodPost)
 	r.HandleFunc("/make_payment", MakePayment).Methods(http.MethodPost)
 	//this endpoint cover all the billing data for oustanding & isdelinquent
 	r.HandleFunc("/get_loan_billing", GetLoanBilling).Methods(http.MethodPost)
+	r.HandleFunc("/api/print", TestPrint).Methods(http.MethodPost, http.MethodOptions)
 
-	fmt.Println("Server is listening on :8080")
+	fmt.Println("Server is listening on :5000")
+	// Set up CORS middleware
+	corsOptions := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},                      // Your Laravel server's IP or domain
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS"}, // HTTP methods you want to allow
+		AllowedHeaders:   []string{"authorization,content-type"},
+		AllowCredentials: true,
+	})
+	// Apply CORS middleware to the Mux router
+	handler := corsOptions.Handler(r)
 	// http.ListenAndServe(":8080", r)
-	log.Fatal(http.ListenAndServe(":8080", r))
+	log.Fatal(http.ListenAndServe(":5000", handler))
 
 	// fmt.Println("Server is running on port 8080")
 	// log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Set CORS headers
+		w.Header().Set("Access-Control-Allow-Origin", "*") // Change "*" to a specific domain for better security
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "content-type, authorization")
+
+		// Handle preflight OPTIONS request
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		// Call the next handler
+		next.ServeHTTP(w, r)
+	})
 }
